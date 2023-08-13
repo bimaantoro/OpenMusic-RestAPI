@@ -3,7 +3,7 @@
 exports.up = (pgm) => {
   pgm.createTable('songs', {
     id: {
-      type: 'serial',
+      type: 'VARCHAR(50)',
       primaryKey: true,
     },
     title: {
@@ -14,11 +14,11 @@ exports.up = (pgm) => {
       type: 'integer',
       notNull: true,
     },
-    genre: {
+    performer: {
       type: 'VARCHAR(100)',
       notNull: true,
     },
-    performer: {
+    genre: {
       type: 'VARCHAR(100)',
       notNull: true,
     },
