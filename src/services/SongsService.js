@@ -32,7 +32,26 @@ class SongsService {
   }
 
   // getAll
-  async getSongs() {
+  async getSongs({ title, performer }) {
+    if (title !== undefined && performer !== undefined) {
+      const query = {
+        text: 'SELECT id, title, performer FROM songs WHERE LOWER(title) LIKE $1 AND LOWER(performer) LIKE $2',
+        values: [`%${title}%`, `%${performer}%`],
+      };
+
+      const result = await this._pool.query(query);
+      return result.rows;
+    }
+
+    if (title !== undefined || performer !== undefined) {
+      const query = {
+        text: 'SELECT id, title, performer FROM songs WHERE LOWER(title) LIKE $1 OR LOWER(performer) LIKE $2',
+        values: [`%${title}%`, `%${performer}%`],
+      };
+
+      const result = await this._pool.query(query);
+      return result.rows;
+    }
     const result = await this._pool.query('SELECT id, title, performer FROM songs');
     return result.rows;
   }
