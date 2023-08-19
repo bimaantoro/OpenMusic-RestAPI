@@ -1,6 +1,5 @@
 const Joi = require('joi');
-
-const currentYear = new Date().getFullYear();
+const { currentYear } = require('../../utils');
 
 const songPayloadSchema = Joi.object({
   title: Joi.string().required(),

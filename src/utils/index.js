@@ -31,4 +31,6 @@ const mapSongDbToModel = ({
   albumId: album_id,
 });
 
-module.exports = { mapAlbumDbToModel, mapSongDbToModel };
+const currentYear = new Date().getFullYear();
+
+module.exports = { mapAlbumDbToModel, mapSongDbToModel, currentYear };
