@@ -7,7 +7,7 @@ exports.up = (pgm) => {
       primaryKey: true,
     },
     title: {
-      type: 'VARCHAR(100)',
+      type: 'VARCHAR(200)',
       notNull: true,
     },
     year: {
@@ -15,18 +15,18 @@ exports.up = (pgm) => {
       notNull: true,
     },
     performer: {
-      type: 'VARCHAR(100)',
+      type: 'VARCHAR(200)',
       notNull: true,
     },
     genre: {
-      type: 'VARCHAR(100)',
+      type: 'VARCHAR(200)',
       notNull: true,
     },
     duration: {
       type: 'integer',
     },
     album_id: {
-      type: 'VARCHAR(100)',
+      type: 'VARCHAR(50)',
     },
     created_at: {
       type: 'timestamp',

@@ -11,7 +11,7 @@ class SongsService {
 
   // add
   async addSong({
-    title, year, performer, genre, duration, albumId = `album-${nanoid(16)}`,
+    title, year, performer, genre, duration, albumId,
   }) {
     const id = `song-${nanoid(16)}`;
     const createdAt = new Date().toISOString();
@@ -90,6 +90,7 @@ class SongsService {
     }
   }
 
+  // delete
   async deleteSongById(id) {
     const query = {
       text: 'DELETE FROM songs WHERE id = $1 RETURNING id',
@@ -101,6 +102,17 @@ class SongsService {
     if (!result.rows.length) {
       throw new NotFoundError('Lagu gagal dihapus. Id tidak ditemukan');
     }
+  }
+
+  // getByAlbumId
+  async getSongsByAlbumId(albumId) {
+    const query = {
+      text: 'SELECT songs.id, songs.title, songs.performer FROM songs INNER JOIN albums ON albums.id = songs.album_id WHERE songs.album_id = $1',
+      values: [albumId],
+    };
+
+    const result = await this._pool.query(query);
+    return result.rows;
   }
 }
 
