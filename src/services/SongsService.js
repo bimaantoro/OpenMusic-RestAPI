@@ -1,8 +1,8 @@
 const { nanoid } = require('nanoid');
 const { Pool } = require('pg');
 const InvariantError = require('../exceptions/InvariantError');
-const { mapSongDbToModel } = require('../utils');
 const NotFoundError = require('../exceptions/NotFoundError');
+const { mapSongDbToModel } = require('../utils');
 
 class SongsService {
   constructor() {
@@ -11,7 +11,7 @@ class SongsService {
 
   // add
   async addSong({
-    title, year, performer, genre, duration, albumId,
+    title, year, performer, genre, duration = null, albumId = null,
   }) {
     const id = `song-${nanoid(16)}`;
     const createdAt = new Date().toISOString();
@@ -21,39 +21,40 @@ class SongsService {
       values: [id, title, year, performer, genre, duration, albumId, createdAt, createdAt],
     };
 
-    const result = await this._pool.query(query);
+    const { rows } = await this._pool.query(query);
 
-    if (!result.rows[0].id) {
+    if (!rows[0].id) {
       throw new InvariantError('Lagu gagal ditambahkan');
     }
 
-    return result.rows[0].id;
+    return rows[0].id;
   }
 
   // getAll
-  async getSongs({ title, performer }) {
-    if (title !== undefined && performer !== undefined) {
-      const query = {
+  async getSongs(title, performer) {
+    let query;
+
+    if (title && performer) {
+      query = {
         text: 'SELECT id, title, performer FROM songs WHERE LOWER(title) LIKE $1 AND LOWER(performer) LIKE $2',
-        values: [`%${title}%`, `%${performer}%`],
+        values: [`%${title.toLowerCase()}%`, `%${performer.toLowerCase()}%`],
       };
-
-      const result = await this._pool.query(query);
-      return result.rows;
+    } else if (title) {
+      query = {
+        text: 'SELECT id, title, performer FROM songs WHERE LOWER(title) LIKE $1',
+        values: [`%${title.toLowerCase()}%`],
+      };
+    } else if (performer) {
+      query = {
+        text: 'SELECT id, title, performer FROM songs WHERE LOWER(performer) LIKE $1',
+        values: [`%${performer.toLowerCase()}%`],
+      };
+    } else {
+      query = 'SELECT id, title, performer FROM songs';
     }
 
-    if (title !== undefined || performer !== undefined) {
-      const query = {
-        text: 'SELECT id, title, performer FROM songs WHERE LOWER(title) LIKE $1 OR LOWER(performer) LIKE $2',
-        values: [`%${title}%`, `%${performer}%`],
-      };
-
-      const result = await this._pool.query(query);
-      return result.rows;
-    }
-
-    const result = await this._pool.query('SELECT id, title, performer FROM songs');
-    return result.rows;
+    const { rows } = await this._pool.query(query);
+    return rows;
   }
 
   // getById
@@ -63,18 +64,18 @@ class SongsService {
       values: [id],
     };
 
-    const result = await this._pool.query(query);
+    const { rows } = await this._pool.query(query);
 
-    if (!result.rows.length) {
+    if (!rows.length) {
       throw new NotFoundError('Lagu tidak ditemukan');
     }
 
-    return result.rows.map(mapSongDbToModel)[0];
+    return rows.map(mapSongDbToModel)[0];
   }
 
   // edit
   async editSongById(id, {
-    title, year, performer, genre, duration, albumId,
+    title, year, performer, genre, duration = null, albumId = null,
   }) {
     const updatedAt = new Date().toISOString();
 
@@ -83,9 +84,9 @@ class SongsService {
       values: [title, year, performer, genre, duration, albumId, updatedAt, id],
     };
 
-    const result = await this._pool.query(query);
+    const { rows } = await this._pool.query(query);
 
-    if (!result.rows.length) {
+    if (!rows.length) {
       throw new NotFoundError('Gagal memperbarui lagu. Id tidak ditemukan');
     }
   }
@@ -97,22 +98,11 @@ class SongsService {
       values: [id],
     };
 
-    const result = await this._pool.query(query);
+    const { rows } = await this._pool.query(query);
 
-    if (!result.rows.length) {
+    if (!rows.length) {
       throw new NotFoundError('Lagu gagal dihapus. Id tidak ditemukan');
     }
-  }
-
-  // getByAlbumId
-  async getSongsByAlbumId(albumId) {
-    const query = {
-      text: 'SELECT songs.id, songs.title, songs.performer FROM songs INNER JOIN albums ON albums.id = songs.album_id WHERE songs.album_id = $1',
-      values: [albumId],
-    };
-
-    const result = await this._pool.query(query);
-    return result.rows;
   }
 }
 

@@ -1,13 +1,14 @@
 class UsersHandler {
-  constructor(service, validator) {
-    this._service = service;
+  constructor(usersService, validator) {
+    this._usersService = usersService;
     this._validator = validator;
   }
 
   async postUserHandler(request, h) {
-    this._validator.validateUserPayload(request.payload);
+    const userPayload = this._validator.validateUserPayload(request.payload);
 
-    const userId = await this._service.addUser(request.payload);
+    const userId = await this._usersService.addUser(userPayload);
+    console.log(userId);
 
     const res = h.response({
       status: 'success',

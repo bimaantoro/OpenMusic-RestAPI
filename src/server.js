@@ -2,12 +2,13 @@ require('dotenv').config();
 const Hapi = require('@hapi/hapi');
 const Jwt = require('@hapi/jwt');
 const ClientError = require('./exceptions/ClientError');
-const plugins = require('./plugins');
+const plugins = require('./commons/plugins');
+const config = require('./commons/config');
 
 const init = async () => {
   const server = Hapi.server({
-    port: process.env.PORT,
-    host: process.env.HOST,
+    port: config.app.port,
+    host: config.app.host,
     debug: {
       request: ['error'],
     },
@@ -35,7 +36,7 @@ const init = async () => {
         return h.continue;
       }
 
-      // console.log(response);
+      console.log(response);
       const newRes = h.response({
         status: 'error',
         message: 'Maaf, terjadi kesalahan pada server kami.',
@@ -54,17 +55,17 @@ const init = async () => {
   ]);
 
   server.auth.strategy('openmusic_jwt', 'jwt', {
-    keys: process.env.ACCESS_TOKEN_KEY,
+    keys: config.jwtToken.accessToken.key,
     verify: {
       aud: false,
       iss: false,
       sub: false,
-      maxAgeSec: process.env.ACCESS_TOKEN_AGE,
+      maxAgeSec: config.jwtToken.accessToken.expiresIn,
     },
     validate: (artifacts) => ({
       isValid: true,
       credentials: {
-        id: artifacts.decoded.payload.id,
+        userId: artifacts.decoded.payload.userId,
       },
     }),
   });

@@ -1,4 +1,4 @@
-const songRoutes = (handler) => [
+const routes = (handler) => [
   {
     method: 'POST',
     path: '/songs',
@@ -6,7 +6,7 @@ const songRoutes = (handler) => [
   },
   {
     method: 'GET',
-    path: '/{songs?}',
+    path: '/songs',
     handler: (request, h) => handler.getSongsHandler(request, h),
   },
   {
@@ -26,4 +26,4 @@ const songRoutes = (handler) => [
   },
 ];
 
-module.exports = songRoutes;
+module.exports = routes;

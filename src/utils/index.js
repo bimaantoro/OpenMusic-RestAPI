@@ -1,4 +1,6 @@
 /* eslint-disable camelcase */
+const currentYear = new Date().getFullYear();
+
 const mapAlbumDbToModel = ({
   id,
   name,
@@ -31,6 +33,4 @@ const mapSongDbToModel = ({
   albumId: album_id,
 });
 
-const currentYear = new Date().getFullYear();
-
-module.exports = { mapAlbumDbToModel, mapSongDbToModel, currentYear };
+module.exports = { currentYear, mapAlbumDbToModel, mapSongDbToModel };
