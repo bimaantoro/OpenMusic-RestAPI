@@ -70,7 +70,8 @@ const plugins = [
   {
     plugin: playlists,
     options: {
-      service: playlistsService,
+      playlistsService,
+      songsService,
       validator: playlistsValidator,
     },
   },
@@ -79,6 +80,7 @@ const plugins = [
     options: {
       collaborationsService,
       playlistsService,
+      usersService,
       validator: collaborationsValidator,
     },
   },

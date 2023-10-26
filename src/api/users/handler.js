@@ -8,7 +8,6 @@ class UsersHandler {
     const userPayload = this._validator.validateUserPayload(request.payload);
 
     const userId = await this._usersService.addUser(userPayload);
-    console.log(userId);
 
     const res = h.response({
       status: 'success',

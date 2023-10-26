@@ -36,7 +36,6 @@ const init = async () => {
         return h.continue;
       }
 
-      console.log(response);
       const newRes = h.response({
         status: 'error',
         message: 'Maaf, terjadi kesalahan pada server kami.',

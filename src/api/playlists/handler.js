@@ -1,8 +1,7 @@
-const NotFoundError = require('../../exceptions/NotFoundError');
-
 class PlaylistsHandler {
-  constructor(playlistsService, validator) {
+  constructor(playlistsService, songsService, validator) {
     this._playlistsService = playlistsService;
+    this._songsService = songsService;
     this._validator = validator;
   }
 
@@ -10,7 +9,6 @@ class PlaylistsHandler {
     const { name } = this._validator.validatePostPlaylistPayload(request.payload);
     const { userId: owner } = request.auth.credentials;
 
-    await this._playlistsService.verifyPlaylistAccess(owner);
     const playlistId = await this._playlistsService.addPlaylist({ name, owner });
 
     const res = h.response({
@@ -27,8 +25,7 @@ class PlaylistsHandler {
   async getPlaylistsHandler(request) {
     const { userId: owner } = request.auth.credentials;
 
-    await this._playlistsService.verifyPlaylistAccess(owner);
-    const playlists = await this._service.getPlaylists(owner);
+    const playlists = await this._playlistsService.getPlaylists(owner);
 
     return {
       status: 'success',
@@ -39,11 +36,11 @@ class PlaylistsHandler {
   }
 
   async deletePlaylistByIdHandler(request) {
-    const { id } = request.params;
+    const { playlistId } = request.params;
     const { userId: owner } = request.auth.credentials;
 
-    await this._playlistsService.verifyPlaylistOwner(id, owner);
-    await this._playlistsService.deletePlaylistById(id);
+    await this._playlistsService.verifyPlaylistOwner(playlistId, owner);
+    await this._playlistsService.deletePlaylistById(playlistId);
 
     return {
       status: 'success',
@@ -56,13 +53,9 @@ class PlaylistsHandler {
     const { songId } = await this._validator.validatePostSongToPlaylistPayload(request.payload);
     const { userId: owner } = request.auth.credentials;
 
-    await this._playlistsService.verifyPlaylistOwner(playlistId, owner);
+    await this._playlistsService.verifyPlaylistAccess(playlistId, owner);
 
-    const isSongExist = await this._playlistsService.isSongExists(songId);
-
-    if (!isSongExist) {
-      throw new NotFoundError('Lagu tidak ditemukan');
-    }
+    await this._songsService.getSongById(songId);
 
     await this._playlistsService.addSongToPlaylist(playlistId, songId);
 
@@ -78,13 +71,7 @@ class PlaylistsHandler {
     const { playlistId } = request.params;
     const { userId: owner } = request.auth.credentials;
 
-    const isPlaylistExist = await this._playlistsService.isPlaylistExists(playlistId);
-
-    if (!isPlaylistExist) {
-      throw new NotFoundError('Playlist tidak ditemukan');
-    }
-
-    await this._playlistsService.verifyPlaylistOwner(playlistId, owner);
+    await this._playlistsService.verifyPlaylistAccess(playlistId, owner);
 
     const playlist = await this._playlistsService.getPlaylistById(playlistId);
     const songs = await this._playlistsService.getSongsByPlaylistId(playlistId);
@@ -105,7 +92,7 @@ class PlaylistsHandler {
     const { songId } = this._validator.validatePostSongToPlaylistPayload(request.payload);
     const { userId: owner } = request.auth.credentials;
 
-    await this._playlistsService.verifyPlaylistOwner(playlistId, owner);
+    await this._playlistsService.verifyPlaylistAccess(playlistId, owner);
     await this._playlistsService.deleteSongFromPlaylist(playlistId, songId);
 
     return {
